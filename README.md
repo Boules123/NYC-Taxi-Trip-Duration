@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">🚕 NYC Taxi Trip Duration Prediction</h1>
+  <h1 align="center">NYC Taxi Trip Duration Prediction</h1>
   <p align="center">
     <strong>End-to-end machine learning pipeline for predicting taxi trip durations in New York City</strong>
   </p>
@@ -41,46 +41,6 @@ A production-ready regression pipeline that predicts NYC taxi trip durations usi
 | **Exploration** | Full EDA notebook with distribution plots, correlation heatmaps, outlier detection, and time-series analysis |
 | **Logging** | Structured Python logging with configurable levels and formatters |
 
----
-<!-- 
-## 🏗 Architecture
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│                        Raw CSV Data                          │
-│          (pickup/dropoff GPS, datetime, metadata)            │
-└──────────────────┬───────────────────────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────────────────────┐
-│               Feature Engineering Pipeline                    │
-│  ┌────────────┐ ┌──────────────┐ ┌─────────────────────────┐ │
-│  │  Temporal   │ │  Geospatial  │ │   Target Transform      │ │
-│  │  Extraction │ │  Distances   │ │   log1p(trip_duration)  │ │
-│  │            │ │              │ │                         │ │
-│  │ • hour     │ │ • haversine  │ │   Outlier Removal       │ │
-│  │ • month    │ │ • manhattan  │ │   IQR-based filtering   │ │
-│  │ • dow      │ │ • bearing    │ │                         │ │
-│  │ • weekend  │ │              │ │                         │ │
-│  │ • night    │ │              │ │                         │ │
-│  │ • peak_hr  │ │              │ │                         │ │
-│  └────────────┘ └──────────────┘ └─────────────────────────┘ │
-└──────────────────┬───────────────────────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────────────────────┐
-│               sklearn Pipeline (serialized)                   │
-│                                                              │
-│   PolynomialFeatures(degree=2) → StandardScaler() → Ridge() │
-└──────────────────┬───────────────────────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────────────────────┐
-│          Predictions (expm1 inverse transform)               │
-│              trip_duration in seconds                         │
-└──────────────────────────────────────────────────────────────┘
-```
- -->
 ---
 
 ## Results
