@@ -22,7 +22,7 @@
 
 ---
 
-## 📖 Overview
+## Overview
 
 A production-ready regression pipeline that predicts NYC taxi trip durations using geospatial feature engineering and polynomial Ridge regression. Built on the [NYC Taxi Trip Duration](https://www.kaggle.com/c/nyc-taxi-trip-duration) dataset, this project demonstrates a clean, reproducible ML workflow — from raw GPS coordinates to calibrated duration estimates.
 
@@ -30,7 +30,7 @@ A production-ready regression pipeline that predicts NYC taxi trip durations usi
 
 ---
 
-## ✨ Features
+## Features
 
 | Category | Details |
 |:---|:---|
@@ -42,7 +42,7 @@ A production-ready regression pipeline that predicts NYC taxi trip durations usi
 | **Logging** | Structured Python logging with configurable levels and formatters |
 
 ---
-
+<!-- 
 ## 🏗 Architecture
 
 ```
@@ -80,10 +80,10 @@ A production-ready regression pipeline that predicts NYC taxi trip durations usi
 │              trip_duration in seconds                         │
 └──────────────────────────────────────────────────────────────┘
 ```
-
+ -->
 ---
 
-## 📊 Results
+## Results
 
 ### Model Performance
 
@@ -114,7 +114,7 @@ A production-ready regression pipeline that predicts NYC taxi trip durations usi
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```
 NYC-Taxi-Trip-Duration/
@@ -136,7 +136,7 @@ NYC-Taxi-Trip-Duration/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -190,7 +190,7 @@ data/nyc_taxi_trip_duration.csv
 
 ---
 
-## 💡 Usage
+## Usage
 
 ### Training
 
@@ -253,7 +253,7 @@ The EDA toolkit (`src/data_staticts.py`) provides:
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 All hyperparameters and project paths are centralized in [`src/config.py`](src/config.py):
 
@@ -276,7 +276,7 @@ TRAIN_CONFIG = {
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Library | Version | Purpose |
 |:--------|:--------|:--------|
@@ -290,7 +290,7 @@ TRAIN_CONFIG = {
 
 ---
 
-## 🗺 Roadmap
+## Roadmap
 
 - [ ] Add CLI argument for custom dataset path and model output directory
 - [ ] Save trained artifacts to `models/` by default
@@ -303,7 +303,7 @@ TRAIN_CONFIG = {
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Here's how to get started:
 
@@ -317,14 +317,6 @@ Please ensure your code follows PEP 8 conventions and includes appropriate docst
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
----
-
-## 📬 Contact
-
-**Boules Ashraf** — [GitHub](https://github.com/Boules123)
-
-If you found this project useful, consider giving it a ⭐!
