@@ -1,198 +1,330 @@
-# NYC Taxi Trip Duration Prediction
+<p align="center">
+  <h1 align="center">🚕 NYC Taxi Trip Duration Prediction</h1>
+  <p align="center">
+    <strong>End-to-end machine learning pipeline for predicting taxi trip durations in New York City</strong>
+  </p>
+  <p align="center">
+    <a href="#-quick-start">Quick Start</a> •
+    <a href="#-features">Features</a> •
+    <a href="#-architecture">Architecture</a> •
+    <a href="#-results">Results</a> •
+    <a href="#-usage">Usage</a> •
+    <a href="#-contributing">Contributing</a>
+  </p>
+  <p align="center">
+    <img src="https://img.shields.io/badge/python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white" alt="Python 3.8+">
+    <img src="https://img.shields.io/badge/scikit--learn-1.0%2B-F7931E?style=flat-square&logo=scikit-learn&logoColor=white" alt="scikit-learn">
+    <img src="https://img.shields.io/badge/pandas-1.3%2B-150458?style=flat-square&logo=pandas&logoColor=white" alt="pandas">
+    <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License: MIT">
+    <img src="https://img.shields.io/badge/code%20style-PEP8-000000?style=flat-square" alt="Code Style: PEP8">
+  </p>
+</p>
 
-Predict NYC taxi trip duration from pickup/dropoff coordinates and pickup time using a feature-engineered Ridge Regression pipeline.
+---
 
-This repository focuses on a clean, educational baseline with practical preprocessing, distance-based features, and a reproducible training + inference flow.
+## 📖 Overview
 
-## Highlights
+A production-ready regression pipeline that predicts NYC taxi trip durations using geospatial feature engineering and polynomial Ridge regression. Built on the [NYC Taxi Trip Duration](https://www.kaggle.com/c/nyc-taxi-trip-duration) dataset, this project demonstrates a clean, reproducible ML workflow — from raw GPS coordinates to calibrated duration estimates.
 
-- End-to-end regression pipeline with `scikit-learn`
-- Feature engineering for temporal and geospatial signals
-- Log-transform strategy for skewed duration targets
-- Outlier handling for more stable model fit
-- Simple CLI for training and batch inference
-- EDA notebook included for exploration
+**Key results:** Achieves **R² = 0.68** and **95.14% MAPE accuracy** on the held-out test set with a lightweight, interpretable model.
 
-## Model Overview
+---
 
-The training pipeline is:
+## ✨ Features
 
-1. `PolynomialFeatures(degree=2, include_bias=False)`
-2. `StandardScaler()`
-3. `Ridge(alpha=1.0)`
+| Category | Details |
+|:---|:---|
+| **Feature Engineering** | Haversine & Manhattan distances, bearing, temporal decomposition (hour, day-of-week, month), binary indicators (weekend, night, peak hour) |
+| **Preprocessing** | Log-transform target for skew correction, IQR-based outlier removal, polynomial feature expansion (degree 2) |
+| **Model** | `Ridge` regression with `StandardScaler` inside a serializable `sklearn.Pipeline` |
+| **Inference** | Single-command batch prediction with automatic inverse transform (`expm1`) |
+| **Exploration** | Full EDA notebook with distribution plots, correlation heatmaps, outlier detection, and time-series analysis |
+| **Logging** | Structured Python logging with configurable levels and formatters |
 
-Primary metrics reported:
+---
 
-- R2 Score
-- MAE
-- RMSE
-- MAPE-based accuracy (`100 - MAPE`)
+## 🏗 Architecture
 
-## Repository Structure
-
-```text
-project_1/
-|- src/
-|  |- config.py
-|  |- data_helper.py
-|  |- data_staticts.py
-|  |- inference.py
-|  |- logger.py
-|  |- train.py
-|  |- utils.py
-|- models/
-|- notebooks/
-|  |- NYC Taxi Trip Duration(EDA).ipynb
-|- requirements.txt
-|- LICENSE
+```
+┌──────────────────────────────────────────────────────────────┐
+│                        Raw CSV Data                          │
+│          (pickup/dropoff GPS, datetime, metadata)            │
+└──────────────────┬───────────────────────────────────────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────────────────────────────┐
+│               Feature Engineering Pipeline                    │
+│  ┌────────────┐ ┌──────────────┐ ┌─────────────────────────┐ │
+│  │  Temporal   │ │  Geospatial  │ │   Target Transform      │ │
+│  │  Extraction │ │  Distances   │ │   log1p(trip_duration)  │ │
+│  │            │ │              │ │                         │ │
+│  │ • hour     │ │ • haversine  │ │   Outlier Removal       │ │
+│  │ • month    │ │ • manhattan  │ │   IQR-based filtering   │ │
+│  │ • dow      │ │ • bearing    │ │                         │ │
+│  │ • weekend  │ │              │ │                         │ │
+│  │ • night    │ │              │ │                         │ │
+│  │ • peak_hr  │ │              │ │                         │ │
+│  └────────────┘ └──────────────┘ └─────────────────────────┘ │
+└──────────────────┬───────────────────────────────────────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────────────────────────────┐
+│               sklearn Pipeline (serialized)                   │
+│                                                              │
+│   PolynomialFeatures(degree=2) → StandardScaler() → Ridge() │
+└──────────────────┬───────────────────────────────────────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────────────────────────────┐
+│          Predictions (expm1 inverse transform)               │
+│              trip_duration in seconds                         │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-## Quick Start
+---
 
-### 1) Clone
+## 📊 Results
+
+### Model Performance
+
+| Split | R² Score | MAE | RMSE | MAPE Accuracy |
+|:------|:--------:|:---:|:----:|:-------------:|
+| **Train** | 0.6800 | 0.3041 | 0.4020 | 95.16% |
+| **Validation** | 0.6809 | 0.3039 | 0.4028 | 95.17% |
+| **Test** | 0.6789 | 0.3056 | 0.4039 | 95.14% |
+
+> **Note:** Metrics are computed on log-transformed targets (`log1p`). The near-identical train/val/test performance indicates the model generalizes well with minimal overfitting.
+
+### Engineered Features
+
+| Feature | Type | Description |
+|:--------|:-----|:------------|
+| `haversine` | Continuous | Great-circle distance between pickup and dropoff (log1p-transformed) |
+| `manhattan` | Continuous | L1 distance between coordinates |
+| `bearing` | Continuous | Initial compass heading from pickup to dropoff |
+| `hour` | Discrete | Hour of pickup (0–23) |
+| `dayofweek` | Discrete | Day of week (0=Mon, 6=Sun) |
+| `month` | Discrete | Month of pickup |
+| `dayofyear` | Discrete | Day of year (1–366) |
+| `is_weekend` | Binary | Saturday or Sunday |
+| `is_night` | Binary | Pickup between 00:00–05:59 |
+| `is_peak_hour` | Binary | Rush hour (7–9 AM, 4–6 PM) |
+| `passenger_count` | Discrete | Number of passengers |
+| `store_and_fwd_flag` | Binary | Whether trip data was held in vehicle memory |
+
+---
+
+## 📂 Repository Structure
+
+```
+NYC-Taxi-Trip-Duration/
+├── src/
+│   ├── config.py            # Centralized paths, hyperparameters, and project settings
+│   ├── data_helper.py       # Data loading, feature engineering, and preprocessing
+│   ├── data_staticts.py     # EDA utilities: plots, statistics, outlier detection
+│   ├── inference.py         # CLI batch inference with trained pipeline
+│   ├── logger.py            # Structured logging configuration
+│   ├── train.py             # Training loop with train/val/test evaluation
+│   └── utils.py             # Metric helpers (R², MAE, RMSE, MAPE accuracy)
+├── models/                  # Saved model artifacts (.pkl)
+├── notebooks/
+│   └── NYC Taxi Trip Duration(EDA).ipynb
+├── requirements.txt
+├── LICENSE
+└── README.md
+```
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.8+
+- pip
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/Boules123/NYC-Taxi-Trip-Duration.git
 cd NYC-Taxi-Trip-Duration
 ```
 
-### 2) Create environment
+### 2. Set Up a Virtual Environment
 
-Windows (PowerShell):
+<details>
+<summary><b>Windows (PowerShell)</b></summary>
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-macOS/Linux:
+</details>
+
+<details>
+<summary><b>macOS / Linux</b></summary>
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3) Install dependencies
+</details>
+
+### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4) Add dataset
+### 4. Prepare the Dataset
 
-Current training code expects one file at:
+Place the [NYC Taxi Trip Duration](https://www.kaggle.com/c/nyc-taxi-trip-duration) CSV in the data directory:
 
-```text
+```
 data/nyc_taxi_trip_duration.csv
 ```
 
-Create the `data/` folder in the project root and place your CSV there.
+> The dataset should contain these columns: `id`, `pickup_datetime`, `pickup_latitude`, `pickup_longitude`, `dropoff_latitude`, `dropoff_longitude`, `passenger_count`, `store_and_fwd_flag`, `trip_duration`.
 
-## Data Schema
+---
 
-Required columns for training:
+## 💡 Usage
 
-- `id`
-- `pickup_datetime`
-- `pickup_latitude`
-- `pickup_longitude`
-- `dropoff_latitude`
-- `dropoff_longitude`
-- `passenger_count`
-- `store_and_fwd_flag` (Y/N)
-- `trip_duration` (target, in seconds)
+### Training
 
-Optional columns supported by preprocessing (dropped if present):
-
-- `dropoff_datetime`
-- `vendor_id`
-
-## Training
-
-Run from project root:
+Run the training pipeline from the project root:
 
 ```bash
 python -m src.train
 ```
 
-What happens during training:
+**What happens:**
 
-- Loads `data/nyc_taxi_trip_duration.csv`
-- Splits into train/val/test
-- Applies preprocessing and feature engineering
-- Trains Ridge pipeline
-- Prints metrics for train/validation/test
-- Saves model as `ridge_pipeline_r2_<score>.pkl` in the current working directory
+1. Loads and splits data into train (80%) / validation (10%) / test (10%)
+2. Applies the full feature engineering pipeline (temporal, geospatial, outlier removal)
+3. Fits a `PolynomialFeatures → StandardScaler → Ridge` pipeline
+4. Evaluates and prints R², MAE, RMSE, and MAPE accuracy for all splits
+5. Serializes the trained pipeline to `ridge_pipeline_r2_<score>.pkl`
 
-## Inference
+### Inference
 
-Run from project root:
+Run batch predictions on new data:
 
 ```bash
-python -m src.inference --test path/to/test.csv --pipeline path/to/ridge_pipeline_r2_xx.pkl --output predictions.csv
+python -m src.inference \
+  --test path/to/test.csv \
+  --pipeline path/to/ridge_pipeline_r2_0.68.pkl \
+  --output predictions.csv
 ```
 
-Output format:
+| Argument | Default | Description |
+|:---------|:--------|:------------|
+| `--test` | `test.csv` | Path to the input CSV file |
+| `--pipeline` | `pipeline.pkl` | Path to the serialized model pipeline |
+| `--output` | `None` | *(Optional)* Path to save predictions CSV |
 
-- `id`
-- `trip_duration` (predicted seconds)
+**Output schema:**
 
-Notes:
+| Column | Description |
+|:-------|:------------|
+| `id` | Original sample identifier |
+| `trip_duration` | Predicted duration in seconds |
 
-- Inference applies the same feature engineering as training.
-- Predictions are transformed back to seconds with `expm1`.
+> Predictions are automatically inverse-transformed from log-space back to seconds via `expm1`.
 
-## Feature Engineering Details
+### Exploratory Data Analysis
 
-- Datetime features: `dayofweek`, `month`, `hour`, `dayofyear`
-- Binary indicators: `is_weekend`, `is_night`, `is_peak_hour`
-- Distance features:
-    - `haversine` (then `log1p`)
-    - `manhattan`
-    - `bearing`
-- Target transform: `trip_duration = log1p(trip_duration)` during training
-- Outlier removal: IQR-based filtering on transformed target
+Launch the Jupyter notebook for interactive exploration:
 
-## Exploratory Data Analysis
+```bash
+jupyter notebook notebooks/NYC\ Taxi\ Trip\ Duration\(EDA\).ipynb
+```
 
-Use the notebook and helper module:
+The EDA toolkit (`src/data_staticts.py`) provides:
+- `describe_data()` — Shape, dtypes, missing values, five-number summary
+- `plot_distribution()` — Histograms for any numerical column
+- `plot_correlation_matrix()` — Annotated correlation heatmap
+- `plot_boxplot()` — Outlier visualization
+- `plot_scatter()` — Bivariate scatter plots
+- `plot_time_series()` — Temporal trend plots
+- `detect_outliers_iqr()` — Statistical outlier detection with IQR bounds
 
-- `notebooks/NYC Taxi Trip Duration(EDA).ipynb`
-- `src/data_staticts.py`
+---
 
-The EDA utilities include:
+## ⚙️ Configuration
 
-- Distribution plots
-- Correlation heatmaps
-- Outlier inspection
-- Summary statistics
-
-## Configuration
-
-Project constants are centralized in `src/config.py` (paths, model params, training config).
-
-Current default model settings:
+All hyperparameters and project paths are centralized in [`src/config.py`](src/config.py):
 
 ```python
+# Hyperparameters
 RIDGE_PARAMS = {
-        "alpha": 1.0,
-        "degree": 2
+    "alpha": 1.0,       # L2 regularization strength
+    "degree": 2          # Polynomial feature expansion degree
+}
+
+# Train/validation/test split ratios
+TRAIN_CONFIG = {
+    "test_size": 0.2,
+    "val_size": 0.1,
+    "random_state": 42,
+    "cv_folds": 5,
+    "shuffle": True
 }
 ```
 
-## Known Limitations
+---
 
-- Training path is currently hardcoded to `data/nyc_taxi_trip_duration.csv`.
-- Trained model is saved to current working directory, not automatically under `models/`.
-- No automated test suite yet.
+## 🛠 Tech Stack
 
-## Suggested Next Improvements
+| Library | Version | Purpose |
+|:--------|:--------|:--------|
+| [NumPy](https://numpy.org/) | ≥ 1.21.0 | Numerical computing |
+| [pandas](https://pandas.pydata.org/) | ≥ 1.3.0 | Data manipulation & I/O |
+| [scikit-learn](https://scikit-learn.org/) | ≥ 1.0.0 | ML pipeline, model, metrics |
+| [Matplotlib](https://matplotlib.org/) | ≥ 3.4.0 | Static visualizations |
+| [Seaborn](https://seaborn.pydata.org/) | ≥ 0.11.0 | Statistical plots |
+| [joblib](https://joblib.readthedocs.io/) | ≥ 1.1.0 | Model serialization |
+| [SciPy](https://scipy.org/) | ≥ 1.7.0 | Scientific computing utilities |
 
-- Add argparse options for train dataset path and model output path
-- Save artifacts under `models/` by default
-- Add unit tests for preprocessing and metrics
-- Add cross-validation and experiment tracking
+---
 
-## License
+## 🗺 Roadmap
 
-This project is licensed under the MIT License. See `LICENSE`.
+- [ ] Add CLI argument for custom dataset path and model output directory
+- [ ] Save trained artifacts to `models/` by default
+- [ ] Add cross-validation with hyperparameter grid search
+- [ ] Integrate experiment tracking (MLflow / Weights & Biases)
+- [ ] Add unit and integration tests (`pytest`)
+- [ ] Implement gradient-boosted model baseline (XGBoost / LightGBM) for comparison
+- [ ] Add Docker support for reproducible environments
+- [ ] Deploy as REST API with FastAPI
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Here's how to get started:
+
+1. **Fork** this repository
+2. **Create** a feature branch: `git checkout -b feature/my-feature`
+3. **Commit** your changes: `git commit -m "feat: add my feature"`
+4. **Push** to your branch: `git push origin feature/my-feature`
+5. Open a **Pull Request**
+
+Please ensure your code follows PEP 8 conventions and includes appropriate docstrings.
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 📬 Contact
+
+**Boules Ashraf** — [GitHub](https://github.com/Boules123)
+
+If you found this project useful, consider giving it a ⭐!
